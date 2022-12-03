@@ -8,6 +8,7 @@ enum Move {
     Scissors
 }
 
+#[derive(Copy, Clone)]
 enum GameResult {
     Lost,
     Draw,
@@ -18,28 +19,29 @@ enum GameResult {
 pub fn run() {
     let pathname = "input_day2.txt";
     let file = File::open(pathname).expect("can't open file");
-    let parsed = BufReader::new(file)
+    let parsed : Vec<(char, char)>= BufReader::new(file)
         .lines()
         .filter_map(|x| x.ok())
         .filter(|x| x.len() == 3)
         .map(|x| parse_pair(x).unwrap())
+        .collect()
         ;
 
     let part1: i32 = parsed
-        .into_iter()
-        .map(|(a, b)| (Move::try_parse(a).unwrap(), Move::try_parse(b).unwrap()))
+        .iter()
+        .map(|(a, b)| (Move::try_parse(*a).unwrap(), Move::try_parse(*b).unwrap()))
         .map(|(enemy, ours)| (play_game(enemy, ours), ours))
         .map(|(r, m)| result_to_points(r, m))
         .sum();
 
     let part2: i32 = parsed
-        .into_iter()
-        .map(|(a, b)| (GameResult::try_parse(b).unwrap(), Move::try_parse(b).unwrap()))
-        .map(|(r, m)| result_to_points(r, m))
+        .iter()
+        .map(|(a, b)| (Move::try_parse(*a).unwrap(), GameResult::try_parse(*b).unwrap()))
+        .map(|(r, m)| result_to_points(m, find_move(r, m)))
         .sum();
 
     println!("part1 {}", part1); // 14264
-    println!("part2 {}", part2); // 14264
+    println!("part2 {}", part2); // 11732 too low
 }
 
 fn parse_pair(s : String) -> Option<(char, char)> {
@@ -85,6 +87,20 @@ fn play_game(enemy: Move, ours: Move) -> GameResult {
         (Move::Scissors, Move::Rock) => GameResult::Lost,
         (Move::Scissors, Move::Paper) => GameResult::Won,
         (Move::Scissors, Move::Scissors) => GameResult::Draw
+    }
+}
+
+fn find_move(enemy: Move, outcome: GameResult) -> Move {
+    return match (enemy, outcome) {
+        (Move::Rock, GameResult::Lost) => Move::Scissors,
+        (Move::Rock, GameResult::Draw) => Move::Rock,
+        (Move::Rock, GameResult::Won) => Move::Paper,
+        (Move::Paper, GameResult::Lost) => Move::Rock,
+        (Move::Paper, GameResult::Draw) => Move::Paper,
+        (Move::Paper, GameResult::Won) => Move::Scissors,
+        (Move::Scissors, GameResult::Lost) => Move::Paper,
+        (Move::Scissors, GameResult::Draw) => Move::Scissors,
+        (Move::Scissors, GameResult::Won) => Move::Rock 
     }
 }
 
