@@ -14,36 +14,32 @@ enum GameResult {
     Won
 }
 
-struct Rule {
-    a: Move,
-    b: Move
-}
-
 #[allow(dead_code)]
 pub fn run() {
     let pathname = "input_day2.txt";
     let file = File::open(pathname).expect("can't open file");
-    let moves : Vec<Rule> = BufReader::new(file)
+    let parsed = BufReader::new(file)
         .lines()
         .filter_map(|x| x.ok())
         .filter(|x| x.len() == 3)
-        .map(|x| {
-            let (a, b) = parse_pair(x).unwrap();
-            return Rule { a: Move::char_to_move(a).unwrap(), b: Move::char_to_move(b).unwrap() };
-        })
-        .collect()
-    ;
-    
-    let points : i32 = moves
-        .into_iter()
-        .map(|x| (play_game(x.a, x.b), x.b))
-        .map(|(r, m)| result_to_points(r, m))
-        .sum()
-    ;
-    
-    println!("part1 {}", points); // 14264
-    
+        .map(|x| parse_pair(x).unwrap())
+        ;
 
+    let part1: i32 = parsed
+        .into_iter()
+        .map(|(a, b)| (Move::try_parse(a).unwrap(), Move::try_parse(b).unwrap()))
+        .map(|(enemy, ours)| (play_game(enemy, ours), ours))
+        .map(|(r, m)| result_to_points(r, m))
+        .sum();
+
+    let part2: i32 = parsed
+        .into_iter()
+        .map(|(a, b)| (GameResult::try_parse(b).unwrap(), Move::try_parse(b).unwrap()))
+        .map(|(r, m)| result_to_points(r, m))
+        .sum();
+
+    println!("part1 {}", part1); // 14264
+    println!("part2 {}", part2); // 14264
 }
 
 fn parse_pair(s : String) -> Option<(char, char)> {
@@ -54,7 +50,7 @@ fn parse_pair(s : String) -> Option<(char, char)> {
 } 
 
 impl Move {
-    fn char_to_move(c: char) -> Option<Move> {
+    fn try_parse(c: char) -> Option<Move> {
         match c {
             'A' => Some(Move::Rock),
             'B' => Some(Move::Paper),
@@ -62,6 +58,17 @@ impl Move {
             'X' => Some(Move::Rock),
             'Y' => Some(Move::Paper),
             'Z' => Some(Move::Scissors),
+            _ => None
+        }
+    }
+}
+
+impl GameResult {
+    fn try_parse(c: char) -> Option<GameResult> {
+        match c {
+            'X' => Some(GameResult::Lost),
+            'Y' => Some(GameResult::Draw),
+            'Z' => Some(GameResult::Won),
             _ => None
         }
     }
