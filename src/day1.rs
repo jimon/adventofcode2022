@@ -2,6 +2,7 @@
 use std::io::{BufRead, BufReader};
 use itertools::Itertools;
 
+#[allow(dead_code)]
 pub fn run() {
     let pathname = "input_day1.txt";
     let file = File::open(pathname).expect("can't open file");
