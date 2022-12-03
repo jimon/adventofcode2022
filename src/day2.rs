@@ -28,10 +28,8 @@ pub fn run() {
         .filter_map(|x| x.ok())
         .filter(|x| x.len() == 3)
         .map(|x| {
-            let mut c = x.chars(); // can we avoid mut?
-            let m1 = char_to_move(c.nth(0).unwrap_or_default()).unwrap();
-            let m2 = char_to_move(c.nth(1).unwrap_or_default()).unwrap();
-            return Rule { a: m1, b: m2 };
+            let (a, b) = parse_pair(x).unwrap();
+            return Rule { a: Move::char_to_move(a).unwrap(), b: Move::char_to_move(b).unwrap() };
         })
         .collect()
     ;
@@ -43,54 +41,43 @@ pub fn run() {
         .sum()
     ;
     
-    println!("points {}", points);
+    println!("part1 {}", points); // 14264
     
-    // 9456 too low
-    
-    //foo.fi
 
 }
 
-#[derive(Debug)]
-pub enum MoveParsingError {
-    UnknownMove
-}
+fn parse_pair(s : String) -> Option<(char, char)> {
+    let mut c = s.chars();
+    let a = c.nth(0)?;
+    let b = c.nth(1)?;
+    return Some((a, b));
+} 
 
-fn char_to_move(c : char) -> Result<Move, MoveParsingError> {
-    match c {
-        'A' => Ok(Move::Rock),
-        'B' => Ok(Move::Paper),
-        'C' => Ok(Move::Scissors),
-        'X' => Ok(Move::Rock),
-        'Y' => Ok(Move::Paper),
-        'Z' => Ok(Move::Scissors),
-        _ => Err(MoveParsingError::UnknownMove)
+impl Move {
+    fn char_to_move(c: char) -> Option<Move> {
+        match c {
+            'A' => Some(Move::Rock),
+            'B' => Some(Move::Paper),
+            'C' => Some(Move::Scissors),
+            'X' => Some(Move::Rock),
+            'Y' => Some(Move::Paper),
+            'Z' => Some(Move::Scissors),
+            _ => None
+        }
     }
 }
 
 fn play_game(enemy: Move, ours: Move) -> GameResult {
-    return match ours {
-        Move::Rock => {
-            match enemy {
-                Move::Rock => GameResult::Draw,
-                Move::Paper => GameResult::Lost,
-                Move::Scissors => GameResult::Won
-            }
-        }
-        Move::Paper => {
-            match enemy {
-                Move::Rock => GameResult::Won,
-                Move::Paper => GameResult::Draw,
-                Move::Scissors => GameResult::Lost
-            }
-        }
-        Move::Scissors => {
-            match enemy {
-                Move::Rock => GameResult::Lost,
-                Move::Paper => GameResult::Won,
-                Move::Scissors => GameResult::Draw
-            }
-        }
+    return match (ours, enemy) {
+        (Move::Rock, Move::Rock) => GameResult::Draw,
+        (Move::Rock, Move::Paper) => GameResult::Lost,
+        (Move::Rock, Move::Scissors) => GameResult::Won,
+        (Move::Paper, Move::Rock) => GameResult::Won,
+        (Move::Paper, Move::Paper) => GameResult::Draw,
+        (Move::Paper, Move::Scissors) => GameResult::Lost, 
+        (Move::Scissors, Move::Rock) => GameResult::Lost,
+        (Move::Scissors, Move::Paper) => GameResult::Won,
+        (Move::Scissors, Move::Scissors) => GameResult::Draw
     }
 }
 
