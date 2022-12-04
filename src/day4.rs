@@ -19,8 +19,14 @@ pub fn run() {
         .iter()
         .filter(|(l, r)| contained_in_each_other(l, r))
         .count();
+
+    let part2 = pairs
+        .iter()
+        .filter(|(l, r)| overlap(l, r))
+        .count();
     
     println!("part1 {}", part1); // 490
+    println!("part2 {}", part2); // 921
 }
 
 fn parse(s: String) -> Option<(RangeInclusive<i32>, RangeInclusive<i32>)> {
@@ -40,5 +46,9 @@ fn parse(s: String) -> Option<(RangeInclusive<i32>, RangeInclusive<i32>)> {
 }
 
 fn contained_in_each_other(l : &RangeInclusive<i32>, r : &RangeInclusive<i32>) -> bool {
-    return (l.start() <= r.start() && l.end() >= r.end()) || (r.start() <= l.start() && r.end() >= l.end()); 
+    return (l.start() <= r.start() && l.end() >= r.end()) || (r.start() <= l.start() && r.end() >= l.end());
+}
+
+fn overlap(l : &RangeInclusive<i32>, r : &RangeInclusive<i32>) -> bool {
+    return l.start() <= r.end() && l.end() >= r.start();
 }
