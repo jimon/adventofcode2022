@@ -58,13 +58,13 @@ fn str_to_hashset(x : &String) -> HashSet<char> {
 fn char_to_score(c : char) -> i32 {
     let u = c as u8;
     let ca = 'a';
-    let cA = 'A';
+    let cua = 'A';
     let cau = ca as u8;
-    let cAu = cA as u8;
+    let cuau = cua as u8;
     if c >= 'a' && c <= 'z' {
         return (u - cau) as i32 + 1;
     } else if c >= 'A' && c <= 'Z' {
-        return (u - cAu) as i32 + 27;
+        return (u - cuau) as i32 + 27;
     } else {
         return 0;
     }
