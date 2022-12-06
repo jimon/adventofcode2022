@@ -9,25 +9,44 @@ pub fn run() {
     let mut line = String::new();
     BufReader::new(file).read_to_string(&mut line).expect("expected line");
     
-    let part1 = part1(&line);
-    println!("part1 {}", part1); // 1655
+    println!("part1 {}", part1(&line)); // 1655
+    println!("part2 {}", part2(&line)); // 2665
 }
 
-fn part1(s: &str) -> i32 {
+fn count(s: &str, length: usize) -> i32 {
+    let mut histogram : [i32; 26] = [0; 26];
+    let mut doubles = 0;
+    
     let b = s.as_bytes();
-    for i in 4..b.len() {
-        if  (b[i - 4] != b[i - 3]) &&
-            (b[i - 4] != b[i - 2]) &&
-            (b[i - 3] != b[i - 2]) &&
-            (b[i - 4] != b[i - 1]) &&
-            (b[i - 3] != b[i - 1]) &&
-            (b[i - 2] != b[i - 1]) {
-            return i as i32;
+    for i in 0..b.len() {
+        if b[i] < b'a' || b[i] > b'z' {
+            return -1;
+        }
+
+        let a = (b[i] - b'a') as usize;
+        histogram[a] += 1;
+        if histogram[a] > 1 {
+            doubles += 1;
+        }
+
+        if i >= length {
+            let c = (b[i - length] - b'a') as usize;
+            histogram[c] -= 1;
+            if histogram[c] >= 1 {
+                doubles -= 1;
+            }
+
+            if doubles <= 0 {
+                return (i + 1) as i32;
+            }
         }
     }
-    
+
     return -1;
 }
+
+fn part1(s: &str) -> i32 { count(s, 4) }
+fn part2(s: &str) -> i32 { count(s, 14) }
 
 #[cfg(test)]
 mod tests {
@@ -40,5 +59,14 @@ mod tests {
         assert_eq!(part1("nppdvjthqldpwncqszvftbrmjlhg"), 6);
         assert_eq!(part1("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg"), 10);
         assert_eq!(part1("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"), 11);
+    }
+
+    #[test]
+    fn part2_examples() {
+        assert_eq!(part2("mjqjpqmgbljsphdztnvjfqwrcgsmlb"), 19);
+        assert_eq!(part2("bvwbjplbgvbhsrlpgdmjqwftvncz"), 23);
+        assert_eq!(part2("nppdvjthqldpwncqszvftbrmjlhg"), 23);
+        assert_eq!(part2("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg"), 29);
+        assert_eq!(part2("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"), 26);
     }
 }
